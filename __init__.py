@@ -43,6 +43,8 @@
 import re
 
 from adapt.intent import IntentBuilder
+from mycroft_bus_client import Message
+from neon_utils.skills import chat_handler
 from neon_utils.user_utils import get_message_user, get_user_prefs
 from neon_utils.skills.common_query_skill import CommonQuerySkill, CQSMatchLevel
 from neon_utils.logger import LOG
@@ -145,6 +147,17 @@ class WolframAlphaSkill(CommonQuerySkill):
                 url = 'https://www.wolframalpha.com/input?i=' + \
                       utterance.replace(' ', '+')
                 self.gui.show_url(url)
+
+    @chat_handler("wolfram")
+    def handle_chat(self, message: Message) -> str:
+        """
+        Handle an incoming chat request.
+        """
+        # TODO: Use Wolfram chat endpoint and include unique conversation key
+        utt = message.data.get("utterance") or message.data.get("utterances",
+                                                                [''])[0]
+        resp, _ = self._query_wolfram(utt, message)
+        return resp or self.dialog_renderer.render("no.response")
 
     def CQS_match_query_phrase(self, utt, message):
         LOG.info(utt)
